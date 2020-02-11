@@ -67,6 +67,7 @@ export interface SetupWizardField {
   // UI
   title: string;
   description: string;
+  secret?: boolean;
   // Validation options
   pattern?: string;
   patternErrorMessage?: string;
@@ -255,6 +256,8 @@ export interface PackageContainer {
   // ### TODO: Move to a different type "InstalledDnpDetail"
   gettingStarted?: string;
   gettingStartedShow?: boolean;
+  setupWizard?: SetupWizardField[];
+  userSettings?: UserSettings;
 }
 
 export interface PackageEnvs {

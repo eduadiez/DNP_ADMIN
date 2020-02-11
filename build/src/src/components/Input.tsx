@@ -10,6 +10,7 @@ interface InputProps {
   prepend?: string | React.ReactElement;
   append?: string | React.ReactElement;
   className?: string;
+  type?: string;
 }
 
 const Input: React.FunctionComponent<
@@ -22,6 +23,7 @@ const Input: React.FunctionComponent<
   prepend,
   append,
   className,
+  type,
   ...props
 }) => {
   /**
@@ -29,7 +31,7 @@ const Input: React.FunctionComponent<
    */
   const input = (
     <input
-      type="text"
+      type={type || "text"}
       className={`form-control ${className}`}
       onChange={e => onValueChange(e.target.value)}
       onKeyPress={onEnterPress ? onEnterKey(onEnterPress) : () => {}}
