@@ -87,7 +87,7 @@ export function MountpointDataView({
 function SelectMountpoint({
   // React JSON form data props
   value,
-  onChange,
+  onValueChange,
   options,
   // Own DAppNode props from redux
   mountpoints: mountpointsApi,
@@ -96,7 +96,7 @@ function SelectMountpoint({
   fetchMountpoints
 }: {
   value: string;
-  onChange: (value: string) => void;
+  onValueChange: (value: string) => void;
   options?: {
     alreadySet?: boolean;
     isLegacy?: boolean;
@@ -136,12 +136,13 @@ function SelectMountpoint({
   // If the user has selected an invalid mountpoint and is not loading or already set,
   // reset the value to the host (default) to prevent problems
   useEffect(() => {
-    if (value && !selectedMountpoint && !alreadySet && !isLoading) onChange("");
-  }, [value, selectedMountpoint, alreadySet, isLoading, onChange]);
+    if (value && !selectedMountpoint && !alreadySet && !isLoading)
+      onValueChange("");
+  }, [value, selectedMountpoint, alreadySet, isLoading, onValueChange]);
 
   async function onSelectMountpoint(mountpoint: string) {
     if (isLegacy || alreadySet) return;
-    onChange(mountpoint);
+    onValueChange(mountpoint);
   }
 
   return (
@@ -181,7 +182,9 @@ function SelectMountpoint({
             {mountpoints.map(fileSystem => (
               <Dropdown.Item
                 key={fileSystem.mountpoint}
-                onClick={() => onSelectMountpoint(fileSystem.mountpoint)}
+                onClick={() => {
+                  onSelectMountpoint(fileSystem.mountpoint);
+                }}
               >
                 <MountpointDataView fileSystem={fileSystem} />
               </Dropdown.Item>

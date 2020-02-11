@@ -3,9 +3,9 @@ import onEnterKey from "utils/onEnterKey";
 import "./input.css";
 
 interface InputProps {
-  onEnterPress: () => void;
-  onValueChange: (value: string) => void;
   value: string;
+  onValueChange: (value: string) => void;
+  onEnterPress?: () => void;
   lock?: boolean;
   prepend?: string | React.ReactElement;
   append?: string | React.ReactElement;
@@ -15,9 +15,9 @@ interface InputProps {
 const Input: React.FunctionComponent<
   InputProps & React.HTMLAttributes<HTMLInputElement>
 > = ({
-  onEnterPress,
-  onValueChange,
   value,
+  onValueChange,
+  onEnterPress,
   lock,
   prepend,
   append,
@@ -32,7 +32,7 @@ const Input: React.FunctionComponent<
       type="text"
       className={`form-control ${className}`}
       onChange={e => onValueChange(e.target.value)}
-      onKeyPress={onEnterKey(onEnterPress)}
+      onKeyPress={onEnterPress ? onEnterKey(onEnterPress) : () => {}}
       value={value}
       // Lock props
       readOnly={lock}

@@ -19,7 +19,8 @@ import {
   RequestedDnp,
   DirectoryItem,
   SpecialPermission,
-  SetupTarget
+  SetupTarget,
+  SetupWizardField
 } from "types";
 import { IsInstallingLogsState } from "services/isInstallingLogs/types";
 import { DnpInstalledState } from "services/dnpInstalled/types";
@@ -188,38 +189,67 @@ const vipnodeMetadata = {
 };
 
 const vipnodeSetup: UserSettings = {
-  environment: { PAYOUT_ADDRESS: "" }
+  environment: { PAYOUT_ADDRESS: "", NODE_TYPE: "client" }
 };
 
-const vipnodeSetupSchema: SetupSchema = {
-  description: `This setup wizard will help you start. In case of problems: https://github.com/dappnode/DAppNodePackage-vipnode#installing-and-setting-up-vipnode`,
-  type: "object",
-  required: ["payoutAddress"],
-  properties: {
-    payoutAddress: {
-      type: "string",
-      title: "Payout address",
-      description: "Define an Ethereum mainnet address to get rewards to",
-      pattern: "^0x[a-fA-F0-9]{40}$"
+const vipnodeSetupWizard: SetupWizardField[] = [
+  {
+    id: "nodeType",
+    title: "Node type",
+    description: "What's the type of your node",
+    required: true,
+    enum: ["client", "host"],
+    target: {
+      type: "environment",
+      name: "NODE_TYPE"
+    }
+  },
+  {
+    id: "payoutAddress",
+    title: "Payout address",
+    description: "Define an payout address",
+    required: true,
+    pattern: "^0x[a-fA-F0-9]{40}$",
+    patternErrorMessage: "Must be a valid address (0x1fd16a...)",
+    target: {
+      type: "environment",
+      name: "PAYOUT_ADDRESS"
+    },
+    if: {
+      required: ["nodeType"],
+      type: "object",
+      properties: {
+        nodeType: { enum: ["host"] }
+      }
+    }
+  },
+  {
+    id: "keystore",
+    title: "Keystore",
+    description: "Upload your keystore file",
+    required: true,
+    target: {
+      type: "fileUpload",
+      path: "/usr/config.json"
+    },
+    if: {
+      required: ["nodeType"],
+      type: "object",
+      properties: {
+        nodeType: { enum: ["host"] }
+      }
+    }
+  },
+  {
+    id: "dataMountpoint",
+    title: "Data mountpoint",
+    description: "Where to store Vipnode's data",
+    target: {
+      type: "namedVolumeMountpoint",
+      volumeName: "data"
     }
   }
-};
-
-const vipnodeSetupTarget: SetupTarget = {
-  payoutAddress: {
-    type: "environment",
-    name: "PAYOUT_ADDRESS"
-  }
-};
-
-const vipnodeSetupUiJson: SetupUiJson = {
-  payoutAddress: {
-    "ui:help": "Don't use your main address",
-    errorMessages: {
-      pattern: "Must be a valid address (0x1fd16a...)"
-    }
-  }
-};
+];
 
 /**
  * Raiden
@@ -1350,14 +1380,8 @@ const dnpRequestState: DnpRequestState = {
       settings: {
         [vipnodeMetadata.name]: vipnodeSetup
       },
-      setupSchema: {
-        [vipnodeMetadata.name]: vipnodeSetupSchema
-      },
-      setupTarget: {
-        [vipnodeMetadata.name]: vipnodeSetupTarget
-      },
-      setupUiJson: {
-        [vipnodeMetadata.name]: vipnodeSetupUiJson
+      setupWizard: {
+        [vipnodeMetadata.name]: vipnodeSetupWizard
       },
 
       request: {
@@ -1447,15 +1471,20 @@ const dnpRequestState: DnpRequestState = {
 
       settings: {},
 
-      setupSchema: {
-        [vipnodeMetadata.name]: vipnodeSetupSchema
+      setupWizard: {
+        [vipnodeMetadata.name]: vipnodeSetupWizard,
+        // Sample setup wizard to see two package forms together
+        "dependency.dnp.dappnode.eth": [
+          {
+            id: "sample",
+            target: { type: "environment", name: "SAMPLE" },
+            title: "Sample",
+            description: "Sample!",
+            required: true
+          }
+        ]
       },
-      setupTarget: {
-        [vipnodeMetadata.name]: vipnodeSetupTarget
-      },
-      setupUiJson: {
-        [vipnodeMetadata.name]: vipnodeSetupUiJson
-      },
+
       request: {
         compatible: {
           requiresCoreUpdate: false,

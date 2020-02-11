@@ -61,6 +61,20 @@ export interface RequestStatus {
   success?: boolean;
 }
 
+export interface SetupWizardField {
+  id: string;
+  target: UserSettingTarget;
+  // UI
+  title: string;
+  description: string;
+  // Validation options
+  pattern?: string;
+  patternErrorMessage?: string;
+  enum?: string[];
+  required?: boolean;
+  if?: SetupSchema;
+}
+
 export type UserSettingTarget =
   | { type: "environment"; name: string }
   | { type: "portMapping"; containerPort: string }
@@ -70,6 +84,10 @@ export type UserSettingTarget =
 
 export interface SetupTarget {
   [propId: string]: UserSettingTarget;
+}
+
+export interface SetupWizardAllDnps {
+  [dnpName: string]: SetupWizardField[];
 }
 
 export interface SetupSchemaAllDnps {
@@ -120,6 +138,7 @@ export interface RequestedDnp {
   origin?: string; // "/ipfs/Qm"
   avatarUrl: string; // "http://dappmanager.dappnode/avatar/Qm7763518d4";
   // Setup
+  setupWizard?: SetupWizardAllDnps;
   setupSchema?: SetupSchemaAllDnps;
   setupTarget?: SetupTargetAllDnps;
   setupUiJson?: SetupUiJsonAllDnps;
