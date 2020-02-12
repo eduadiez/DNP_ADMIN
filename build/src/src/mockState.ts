@@ -19,12 +19,10 @@ import {
   RequestedDnp,
   DirectoryItem,
   SpecialPermission,
-  SetupTarget,
-  SetupWizardField
+  SetupWizard
 } from "types";
 import { IsInstallingLogsState } from "services/isInstallingLogs/types";
 import { DnpInstalledState } from "services/dnpInstalled/types";
-import { SetupSchema, SetupUiJson } from "types-own";
 import { CoreUpdateState } from "services/coreUpdate/types";
 import { USER_SETTING_DISABLE_TAG } from "params";
 
@@ -105,64 +103,32 @@ const lightningNetworkMetadata = {
   }
 };
 
-const lightningNetworkSetupWizard: SetupWizardField[] = [
-  {
-    id: "rtlPassword",
-    title: "RTL password",
-    description: "Password to protect RTL",
-    pattern: "^.{8,}$",
-    patternErrorMessage: "Must be at least 8 characters long",
-    secret: true,
-    target: {
-      type: "environment",
-      name: "RTL_PASSWORD"
-    }
-  },
-  {
-    id: "network",
-    title: "Network",
-    description: "Choose which network to connect to",
-    enum: ["mainnet", "testnet"],
-    target: {
-      type: "environment",
-      name: "NETWORK"
-    }
-  }
-];
-
-const lightningNetworkSetupSchema: SetupSchema = {
-  description: `This setup wizard will help you start. In case of problems: https://vipnode.io`,
-  type: "object",
-  required: ["rtlPassword", "network"],
-  properties: {
-    rtlPassword: {
-      type: "string",
+const lightningNetworkSetupWizard: SetupWizard = {
+  fields: [
+    {
+      id: "rtlPassword",
       title: "RTL password",
       description: "Password to protect RTL",
-      minLength: 8
+      pattern: "^.{8,}$",
+      patternErrorMessage: "Must be at least 8 characters long",
+      secret: true,
+      target: {
+        type: "environment",
+        name: "RTL_PASSWORD"
+      }
     },
-    network: {
-      type: "string",
+    {
+      id: "network",
       title: "Network",
       description: "Choose which network to connect to",
-      default: "mainnet",
-      enum: ["mainnet", "testnet"]
+      enum: ["mainnet", "testnet"],
+      target: {
+        type: "environment",
+        name: "NETWORK"
+      }
     }
-  }
+  ]
 };
-
-const lightningNetworkSetupTarget: SetupTarget = {
-  rtlPassword: {
-    type: "environment",
-    name: "RTL_PASSWORD"
-  },
-  network: {
-    type: "environment",
-    name: "NETWORK"
-  }
-};
-
-const lightningNetworkSetupUiJson = {};
 
 const lightningNetworkSetup: UserSettings = {
   portMappings: { "9735": "9735" },
@@ -263,64 +229,66 @@ const vipnodeSetup: UserSettings = {
   environment: { PAYOUT_ADDRESS: "", NODE_TYPE: "client" }
 };
 
-const vipnodeSetupWizard: SetupWizardField[] = [
-  {
-    id: "nodeType",
-    title: "Node type",
-    description: "What's the type of your node",
-    required: true,
-    enum: ["client", "host"],
-    target: {
-      type: "environment",
-      name: "NODE_TYPE"
-    }
-  },
-  {
-    id: "payoutAddress",
-    title: "Payout address",
-    description: "Define an payout address",
-    required: true,
-    pattern: "^0x[a-fA-F0-9]{40}$",
-    patternErrorMessage: "Must be a valid address (0x1fd16a...)",
-    target: {
-      type: "environment",
-      name: "PAYOUT_ADDRESS"
+const vipnodeSetupWizard: SetupWizard = {
+  fields: [
+    {
+      id: "nodeType",
+      title: "Node type",
+      description: "What's the type of your node",
+      required: true,
+      enum: ["client", "host"],
+      target: {
+        type: "environment",
+        name: "NODE_TYPE"
+      }
     },
-    if: {
-      required: ["nodeType"],
-      type: "object",
-      properties: {
-        nodeType: { enum: ["host"] }
+    {
+      id: "payoutAddress",
+      title: "Payout address",
+      description: "Define an payout address",
+      required: true,
+      pattern: "^0x[a-fA-F0-9]{40}$",
+      patternErrorMessage: "Must be a valid address (0x1fd16a...)",
+      target: {
+        type: "environment",
+        name: "PAYOUT_ADDRESS"
+      },
+      if: {
+        required: ["nodeType"],
+        type: "object",
+        properties: {
+          nodeType: { enum: ["host"] }
+        }
+      }
+    },
+    {
+      id: "keystore",
+      title: "Keystore",
+      description: "Upload your keystore file",
+      required: true,
+      target: {
+        type: "fileUpload",
+        path: "/usr/config.json"
+      },
+      if: {
+        required: ["nodeType"],
+        type: "object",
+        properties: {
+          nodeType: { enum: ["host"] }
+        }
+      }
+    },
+    {
+      id: "dataMountpoint",
+      title: "Data mountpoint",
+      description: "Where to store Vipnode's data",
+      target: {
+        type: "namedVolumeMountpoint",
+        volumeName: "data"
       }
     }
-  },
-  {
-    id: "keystore",
-    title: "Keystore",
-    description: "Upload your keystore file",
-    required: true,
-    target: {
-      type: "fileUpload",
-      path: "/usr/config.json"
-    },
-    if: {
-      required: ["nodeType"],
-      type: "object",
-      properties: {
-        nodeType: { enum: ["host"] }
-      }
-    }
-  },
-  {
-    id: "dataMountpoint",
-    title: "Data mountpoint",
-    description: "Where to store Vipnode's data",
-    target: {
-      type: "namedVolumeMountpoint",
-      volumeName: "data"
-    }
-  }
-];
+  ]
+};
 
 /**
  * Raiden
@@ -365,60 +333,45 @@ const raidenMetadata = {
   license: "MIT License"
 };
 
-const raidenSetupSchema: SetupSchema = {
-  description: `Raiden setup wizard https://github.com/dappnode/DAppNodePackage-raiden
-  
-In mainet you will have to install the mainet package and take into account that your Ethereum node should be running with this flags.
-
-\`--jsonrpc-apis=eth,net,web3,parity\` and the flag \`--no-ancient-blocks\` should not be activated.  
-  
-If you do not have a keystore file, you can create a new wallet in My Ether Wallet or MyCrypto, and then fund it with a bit of ETH / WETH (only token supported in mainet at the moment). Please be aware that the online creation of wallets via a keystore file is not such a good security practice. This can be mitigated if you download the MyCrypto local app and create the wallet offline. Do not leave significant value in wallets created through this method.
-`,
-  type: "object",
-  required: ["keystore", "keystorePassword", "keystoreAddress"],
-  properties: {
-    keystore: {
-      type: "string",
-      format: "data-url",
+const raidenSetupWizard: SetupWizard = {
+  fields: [
+    {
+      id: "keystore",
       title: "Keystore",
-      description: "Keystore with the account to be used in your Raiden node"
+      description: "Keystore with the account to be used in your Raiden node",
+      target: {
+        type: "fileUpload",
+        path: "/usr/src/app"
+      }
     },
-    keystoreSet: {
-      type: "string",
-      format: "data-url",
+    {
+      id: "keystoreSet",
       title: "Keystore already set",
-      description: "Should be hidden"
+      description: "Should be hidden",
+      target: {
+        type: "fileUpload",
+        path: "/usr/src/app-set"
+      }
     },
-    keystorePassword: {
-      type: "string",
+    {
+      id: "keystorePassword",
       title: "Keystore password",
-      description: "Password of the uploaded keystore"
+      description: "Password of the uploaded keystore",
+      target: {
+        type: "environment",
+        name: "RAIDEN_KEYSTORE_PASSWORD"
+      }
     },
-    keystoreAddress: {
-      type: "string",
+    {
+      id: "keystoreAddress",
       title: "Keystore address",
-      description: "Address of the uploaded keystore"
+      description: "Address of the uploaded keystore",
+      target: {
+        type: "environment",
+        name: "RAIDEN_ADDRESS"
+      }
     }
-  }
-};
-
-const raidenSetupTarget: SetupTarget = {
-  keystore: {
-    type: "fileUpload",
-    path: "/usr/src/app"
-  },
-  keystoreSet: {
-    type: "fileUpload",
-    path: "/usr/src/app-set"
-  },
-  keystorePassword: {
-    type: "environment",
-    name: "RAIDEN_KEYSTORE_PASSWORD"
-  },
-  keystoreAddress: {
-    type: "environment",
-    name: "RAIDEN_ADDRESS"
-  }
+  ]
 };
 
 const raidenSetup: UserSettings = {
@@ -532,114 +485,57 @@ const bitcoinUserSettings: UserSettings = {
   allNamedVolumeMountpoint: USER_SETTING_DISABLE_TAG
 };
 
-const bitcoinSetupWizard: SetupWizardField[] = [
-  {
-    id: "bitcoinData",
-    title: "Custom volume data path",
-    description:
-      "If you want to store the Bitcoin blockchain is a separate drive, enter the absolute path of the location of an external drive.",
-    target: {
-      type: "namedVolumeMountpoint",
-      volumeName: "bitcoin_data"
-    }
-  },
-  {
-    id: "bitcoinDataOld",
-    title: "Custom volume data old path",
-    description:
-      "Already set path to test that it's not editable. If you want to store the Bitcoin blockchain is a separate drive, enter the absolute path of the location of an external drive.",
-    target: {
-      type: "namedVolumeMountpoint",
-      volumeName: "bitcoin_data_old"
-    }
-  },
-  {
-    id: "bitcoinDataOldLegacy",
-    title: "Custom volume data old legacy path",
-    description:
-      "Already set path to test that it's not editable, with legacy setting. If you want to store the Bitcoin blockchain is a separate drive, enter the absolute path of the location of an external drive.",
-    target: {
-      type: "namedVolumeMountpoint",
-      volumeName: "bitcoin_data_old_legacy"
-    }
-  },
-  {
-    id: "bitcoinAllVolumes",
-    title: "All volumes",
-    description: "This mountpoint selector should affect all named volumes",
-    target: {
-      type: "allNamedVolumesMountpoint"
-    }
-  },
-  {
-    id: "bitcoinName",
-    title: "Bitcoin name",
-    description: "Useless parameter to test performance",
-    target: {
-      type: "environment",
-      name: "BITCOIN_NAME"
-    }
-  }
-];
-
-const bitcoinSetupSchema: SetupSchema = {
-  description: `Bitcoin setup https://docs.bitcoin.io`,
-  type: "object",
-  properties: {
-    bitcoinData: {
-      type: "string",
+const bitcoinSetupWizard: SetupWizard = {
+  fields: [
+    {
+      id: "bitcoinData",
       title: "Custom volume data path",
       description:
-        "If you want to store the Bitcoin blockchain is a separate drive, enter the absolute path of the location of an external drive."
+        "If you want to store the Bitcoin blockchain is a separate drive, enter the absolute path of the location of an external drive.",
+      target: {
+        type: "namedVolumeMountpoint",
+        volumeName: "bitcoin_data"
+      }
     },
-    bitcoinDataOld: {
-      type: "string",
+    {
+      id: "bitcoinDataOld",
       title: "Custom volume data old path",
       description:
-        "Already set path to test that it's not editable. If you want to store the Bitcoin blockchain is a separate drive, enter the absolute path of the location of an external drive."
+        "Already set path to test that it's not editable. If you want to store the Bitcoin blockchain is a separate drive, enter the absolute path of the location of an external drive.",
+      target: {
+        type: "namedVolumeMountpoint",
+        volumeName: "bitcoin_data_old"
+      }
     },
-    bitcoinDataOldLegacy: {
-      type: "string",
+    {
+      id: "bitcoinDataOldLegacy",
       title: "Custom volume data old legacy path",
       description:
-        "Already set path to test that it's not editable, with legacy setting. If you want to store the Bitcoin blockchain is a separate drive, enter the absolute path of the location of an external drive."
+        "Already set path to test that it's not editable, with legacy setting. If you want to store the Bitcoin blockchain is a separate drive, enter the absolute path of the location of an external drive.",
+      target: {
+        type: "namedVolumeMountpoint",
+        volumeName: "bitcoin_data_old_legacy"
+      }
     },
-    bitcoinAllVolumes: {
-      type: "string",
+    {
+      id: "bitcoinAllVolumes",
       title: "All volumes",
-      description: "This mountpoint selector should affect all named volumes"
+      description: "This mountpoint selector should affect all named volumes",
+      target: {
+        type: "allNamedVolumesMountpoint"
+      }
     },
-    bitcoinName: {
-      type: "string",
+    {
+      id: "bitcoinName",
       title: "Bitcoin name",
-      description: "Useless parameter to test performance"
+      description: "Useless parameter to test performance",
+      target: {
+        type: "environment",
+        name: "BITCOIN_NAME"
+      }
     }
-  }
+  ]
 };
-
-const bitcoinSetupTarget: SetupTarget = {
-  bitcoinData: {
-    type: "namedVolumeMountpoint",
-    volumeName: "bitcoin_data"
-  },
-  bitcoinDataOld: {
-    type: "namedVolumeMountpoint",
-    volumeName: "bitcoin_data_old"
-  },
-  bitcoinDataOldLegacy: {
-    type: "namedVolumeMountpoint",
-    volumeName: "bitcoin_data_old_legacy"
-  },
-  bitcoinAllVolumes: {
-    type: "allNamedVolumesMountpoint"
-  },
-  bitcoinName: {
-    type: "environment",
-    name: "BITCOIN_NAME"
-  }
-};
-
-const bitcoinSetupUiJson: SetupUiJson = {};
 
 /**
  * Ethchain
@@ -746,93 +642,56 @@ const trustlinesSetup = {
   namedVolumeMountpoints: { data: "", config: "" }
 };
 
-const trustlinesSetupSchema: SetupSchema = {
-  description:
-    "Welcome to DAppNode's Trustlines Network configuration wizard!\n\nWe'll help you set up your node according to your needs, just follow the steps below:",
-  type: "object",
-  properties: {
-    role: {
-      type: "string",
+const trustlinesSetupWizard: SetupWizard = {
+  fields: [
+    {
+      id: "role",
+      target: {
+        type: "environment",
+        name: "ROLE"
+      },
       title: "Node role",
       description:
         "The Trustlines Network node can operate in three different modes:\n\n  1. **Observer** - for a node without an address that just wants to monitor the activity in the network,\n  2. **Participant** - for those nodes who have/want an address and want to actively broadcast transactions, and\n  3. **Validator** - for those who successfully bid for a [Validator slot](https://medium.com/trustlines-foundation/trustlines-validator-spotlight-deep-dive-on-rewards-economics-and-opportunities-for-validators-ec75f81088a6) during Trustlines Foundation's Validator Auction and will be validating the network.\n\n\nSelect your preferred option on the drop-down menu below. Please note you won't be able to Validate if your address was not whitelisted at the end of the Validator Slots auction.",
       enum: ["observer", "participant", "validator"],
-      default: "observer"
+      required: true
+    },
+    {
+      id: "keystore",
+      target: {
+        type: "fileUpload",
+        path: "/config/custom/keys/Trustlines/main-keystore.json"
+      },
+      title: "Keystore",
+      description:
+        "Your Keystore/JSON file containing the private key that you want to use for this node",
+      required: true
+    },
+    {
+      id: "keystoreAddress",
+      target: {
+        type: "environment",
+        name: "ADDRESS"
+      },
+      title: "Public Address",
+      description:
+        "Public address from the keystore.\nFor validators, you will use this address to seal blocks so it must be an authorized validator address, you can check the valid addresses in [this list](https://github.com/trustlines-protocol/blockchain/blob/1c664ff7d28998b7070c9edb3b325062a5365aad/chain/tlbc/tlbc-spec.json#L11)",
+      pattern: "^0x[a-fA-F0-9]{40}$",
+      patternErrorMessage: "Must be a valid address (0x1fd16a...)",
+      required: true
+    },
+    {
+      id: "keystorePassword",
+      target: {
+        type: "environment",
+        name: "PASSWORD"
+      },
+      title: "Password",
+      description: "Password to unlock the uploaded keystore",
+      required: true,
+      secret: true
     }
-  },
-  required: ["role"],
-  // @ts-ignore
-  dependencies: {
-    role: {
-      oneOf: [
-        {
-          properties: {
-            role: {
-              enum: ["observer"]
-            }
-          }
-        },
-        {
-          properties: {
-            role: {
-              enum: ["participant", "validator"]
-            },
-            keystore: {
-              type: "string",
-              format: "data-url",
-              title: "Keystore",
-              description:
-                "Your Keystore/JSON file containing the private key that you want to use for this node"
-            },
-            keystoreAddress: {
-              type: "string",
-              title: "Public Address",
-              description:
-                "Public address from the keystore.\nFor validators, you will use this address to seal blocks so it must be an authorized validator address, you can check the valid addresses in [this list](https://github.com/trustlines-protocol/blockchain/blob/1c664ff7d28998b7070c9edb3b325062a5365aad/chain/tlbc/tlbc-spec.json#L11)",
-              pattern: "^0x[a-fA-F0-9]{40}$"
-            },
-            keystorePassword: {
-              type: "string",
-              title: "Password",
-              description: "Password to unlock the uploaded keystore"
-            }
-          },
-          required: ["keystore", "keystoreAddress", "keystorePassword"]
-        }
-      ]
-    }
-  }
-};
-
-const trustlinesSetupTarget: SetupTarget = {
-  role: {
-    type: "environment",
-    name: "ROLE"
-  },
-  keystore: {
-    type: "fileUpload",
-    path: "/config/custom/keys/Trustlines/main-keystore.json"
-  },
-  keystoreAddress: {
-    type: "environment",
-    name: "ADDRESS"
-  },
-  keystorePassword: {
-    type: "environment",
-    name: "PASSWORD"
-  }
-};
-
-const trustlinesSetupUiJson = {
-  "ui:order": ["role", "*"],
-  keystorePassword: {
-    "ui:widget": "password"
-  },
-  keystoreAddress: {
-    errorMessages: {
-      pattern: "Must be a valid address (0x1fd16a...)"
-    }
-  }
+  ]
 };
 
 // Fake is installing package
@@ -869,9 +728,7 @@ const sampleRequestState: RequestedDnp = {
   isUpdated: false,
   isInstalled: true,
   settings: {},
-  setupSchema: {},
-  setupTarget: {},
-  setupUiJson: {},
+  setupWizard: {},
 
   request: {
     compatible: {
@@ -1276,16 +1133,14 @@ const dnpInstalledState: DnpInstalledState = {
           size: 2
         }
       ],
+
       manifest: lightningNetworkMetadata,
-      envs: {
-        ENV_NAME: "ENV_VALUE"
-      },
       gettingStarted: lightningNetworkGettingStarted,
       gettingStartedShow: true,
-      setupWizard: lightningNetworkSetupWizard.filter(
-        field => field.target.type === "environment"
-      ),
-      userSettings: lightningNetworkUserSettingsInstalled
+
+      envs: {
+        ENV_NAME: "ENV_VALUE"
+      }
     },
     {
       ...samplePackageContainer,
@@ -1336,10 +1191,12 @@ const dnpInstalledState: DnpInstalledState = {
           size: 94620000000
         }
       ],
+
+      manifest: ethchainMetadata,
+
       envs: {
         DEFAULT_CLIENT: "GETH"
-      },
-      manifest: ethchainMetadata
+      }
     }
   ],
   dnpInstalledData: {
@@ -1351,7 +1208,13 @@ const dnpInstalledState: DnpInstalledState = {
             "/dev1/data/dappnode-volumes/bitcoin.dnp.dappnode.eth/data",
           mountpoint: "/dev1/data"
         }
-      }
+      },
+      setupWizard: {
+        fields: lightningNetworkSetupWizard.fields.filter(
+          field => !field.target || field.target.type === "environment"
+        )
+      },
+      userSettings: lightningNetworkUserSettingsInstalled
     }
   },
   dnpInstalledDataRequestStatus: {}
@@ -1384,18 +1247,6 @@ const dnpRequestState: DnpRequestState = {
       setupWizard: {
         [lightningNetworkMetadata.name]: lightningNetworkSetupWizard,
         [bitcoinMetadata.name]: bitcoinSetupWizard
-      },
-      setupSchema: {
-        [lightningNetworkMetadata.name]: lightningNetworkSetupSchema,
-        [bitcoinMetadata.name]: bitcoinSetupSchema
-      },
-      setupTarget: {
-        [lightningNetworkMetadata.name]: lightningNetworkSetupTarget,
-        [bitcoinMetadata.name]: bitcoinSetupTarget
-      },
-      setupUiJson: {
-        [lightningNetworkMetadata.name]: lightningNetworkSetupUiJson,
-        [bitcoinMetadata.name]: {}
       },
 
       request: {
@@ -1431,14 +1282,8 @@ const dnpRequestState: DnpRequestState = {
       settings: {
         [bitcoinMetadata.name]: bitcoinUserSettings
       },
-      setupSchema: {
-        [bitcoinMetadata.name]: bitcoinSetupSchema
-      },
-      setupTarget: {
-        [bitcoinMetadata.name]: bitcoinSetupTarget
-      },
-      setupUiJson: {
-        [bitcoinMetadata.name]: bitcoinSetupUiJson
+      setupWizard: {
+        [bitcoinMetadata.name]: bitcoinSetupWizard
       },
 
       request: {
@@ -1507,14 +1352,8 @@ const dnpRequestState: DnpRequestState = {
       settings: {
         [trustlinesMetadata.name]: trustlinesSetup
       },
-      setupSchema: {
-        [trustlinesMetadata.name]: trustlinesSetupSchema
-      },
-      setupTarget: {
-        [trustlinesMetadata.name]: trustlinesSetupTarget
-      },
-      setupUiJson: {
-        [trustlinesMetadata.name]: trustlinesSetupUiJson
+      setupWizard: {
+        [trustlinesMetadata.name]: trustlinesSetupWizard
       }
     },
 
@@ -1529,13 +1368,9 @@ const dnpRequestState: DnpRequestState = {
       settings: {
         [raidenMetadata.name]: raidenSetup
       },
-      setupSchema: {
-        [raidenMetadata.name]: raidenSetupSchema
-      },
-      setupTarget: {
-        [raidenMetadata.name]: raidenSetupTarget
-      },
-      setupUiJson: {}
+      setupWizard: {
+        [raidenMetadata.name]: raidenSetupWizard
+      }
     },
 
     [raidenTestnetMetadata.name]: {
@@ -1568,15 +1403,17 @@ const dnpRequestState: DnpRequestState = {
       setupWizard: {
         [vipnodeMetadata.name]: vipnodeSetupWizard,
         // Sample setup wizard to see two package forms together
-        "dependency.dnp.dappnode.eth": [
-          {
-            id: "sample",
-            target: { type: "environment", name: "SAMPLE" },
-            title: "Sample",
-            description: "Sample!",
-            required: true
-          }
-        ]
+        "dependency.dnp.dappnode.eth": {
+          fields: [
+            {
+              id: "sample",
+              target: { type: "environment", name: "SAMPLE" },
+              title: "Sample",
+              description: "Sample!",
+              required: true
+            }
+          ]
+        }
       },
 
       request: {

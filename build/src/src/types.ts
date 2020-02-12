@@ -61,9 +61,13 @@ export interface RequestStatus {
   success?: boolean;
 }
 
+export interface SetupWizard {
+  fields: SetupWizardField[];
+}
+
 export interface SetupWizardField {
   id: string;
-  target: UserSettingTarget;
+  target?: UserSettingTarget; // Allow form questions
   // UI
   title: string;
   description: string;
@@ -83,12 +87,12 @@ export type UserSettingTarget =
   | { type: "allNamedVolumesMountpoint" }
   | { type: "fileUpload"; path: string };
 
-export interface SetupTarget {
-  [propId: string]: UserSettingTarget;
+export interface SetupWizardAllDnps {
+  [dnpName: string]: SetupWizard;
 }
 
-export interface SetupWizardAllDnps {
-  [dnpName: string]: SetupWizardField[];
+export interface SetupTarget {
+  [propId: string]: UserSettingTarget;
 }
 
 export interface SetupSchemaAllDnps {
@@ -140,9 +144,6 @@ export interface RequestedDnp {
   avatarUrl: string; // "http://dappmanager.dappnode/avatar/Qm7763518d4";
   // Setup
   setupWizard?: SetupWizardAllDnps;
-  setupSchema?: SetupSchemaAllDnps;
-  setupTarget?: SetupTargetAllDnps;
-  setupUiJson?: SetupUiJsonAllDnps;
   settings: UserSettingsAllDnps; // MUST include the previous user settings
   // Additional data
   imageSize: number;
@@ -242,7 +243,6 @@ export interface PackageContainer {
   ip?: string; // IP of the DNP in the dappnode network
   state: ContainerStatus;
   running: boolean;
-  manifest?: Manifest;
   envs?: PackageEnvs;
   ports: PortMapping[];
   volumes: VolumeMapping[];
@@ -253,11 +253,11 @@ export interface PackageContainer {
   avatarUrl: string;
   origin?: string;
   chain?: string;
-  // ### TODO: Move to a different type "InstalledDnpDetail"
+  // ### TODO: Move to PackageDetails, note it will require significant
+  // changes to the ADMIN UI in parts the code is not yet typed
+  manifest?: Manifest;
   gettingStarted?: string;
   gettingStartedShow?: boolean;
-  setupWizard?: SetupWizardField[];
-  userSettings?: UserSettings;
 }
 
 export interface PackageEnvs {
@@ -265,7 +265,7 @@ export interface PackageEnvs {
 }
 
 export interface PackageDetailData {
-  volumes: {
+  volumes?: {
     // volumeName = bitcoin_data
     [volumeName: string]: {
       size?: string; // "823203"
@@ -273,6 +273,8 @@ export interface PackageDetailData {
       mountpoint?: string; // "/dev1/data"
     };
   };
+  setupWizard?: SetupWizard;
+  userSettings?: UserSettings;
 }
 
 export interface ManifestUpdateAlert {
@@ -640,9 +642,7 @@ export interface PackageReleaseMetadata {
     featuredColor?: string;
     featuredAvatarFilter?: string;
   };
-  setupSchema?: SetupSchema;
-  setupUiJson?: SetupUiJson;
-  setupTarget?: SetupTarget;
+  setupWizard?: SetupWizard;
   author?: string;
   contributors?: string[];
   categories?: string[];
