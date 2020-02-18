@@ -62,6 +62,7 @@ export interface RequestStatus {
 }
 
 export interface SetupWizard {
+  version: "2";
   fields: SetupWizardField[];
 }
 
@@ -77,7 +78,7 @@ export interface SetupWizardField {
   patternErrorMessage?: string;
   enum?: string[];
   required?: boolean;
-  if?: SetupSchema;
+  if?: SetupSchema | { [id: string]: SetupSchema };
 }
 
 export type UserSettingTarget =

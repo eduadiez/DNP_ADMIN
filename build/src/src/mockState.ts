@@ -104,6 +104,7 @@ const lightningNetworkMetadata = {
 };
 
 const lightningNetworkSetupWizard: SetupWizard = {
+  version: "2",
   fields: [
     {
       id: "rtlPassword",
@@ -127,6 +128,20 @@ const lightningNetworkSetupWizard: SetupWizard = {
       title: "Network",
       description: "Choose which network to connect to",
       enum: ["mainnet", "testnet"]
+    },
+    {
+      id: "onlyTestnet",
+      target: {
+        type: "environment",
+        name: "ONLY_TESTNET"
+      },
+      title: "Only testnet",
+      description:
+        "Mock variable that should only be visible if `network = testnet`",
+      required: true,
+      if: {
+        network: { enum: ["testnet"] }
+      }
     }
   ]
 };
@@ -231,6 +246,7 @@ const vipnodeSetup: UserSettings = {
 };
 
 const vipnodeSetupWizard: SetupWizard = {
+  version: "2",
   fields: [
     {
       id: "nodeType",
@@ -335,6 +351,7 @@ const raidenMetadata = {
 };
 
 const raidenSetupWizard: SetupWizard = {
+  version: "2",
   fields: [
     {
       id: "keystore",
@@ -487,6 +504,7 @@ const bitcoinUserSettings: UserSettings = {
 };
 
 const bitcoinSetupWizard: SetupWizard = {
+  version: "2",
   fields: [
     {
       id: "bitcoinData",
@@ -644,6 +662,7 @@ const trustlinesSetup = {
 };
 
 const trustlinesSetupWizard: SetupWizard = {
+  version: "2",
   fields: [
     {
       id: "role",
@@ -1211,6 +1230,7 @@ const dnpInstalledState: DnpInstalledState = {
         }
       },
       setupWizard: {
+        version: "2",
         fields: lightningNetworkSetupWizard.fields.filter(
           field => !field.target || field.target.type === "environment"
         )
@@ -1405,6 +1425,7 @@ const dnpRequestState: DnpRequestState = {
         [vipnodeMetadata.name]: vipnodeSetupWizard,
         // Sample setup wizard to see two package forms together
         "dependency.dnp.dappnode.eth": {
+          version: "2",
           fields: [
             {
               id: "sample",
