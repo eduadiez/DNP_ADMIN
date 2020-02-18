@@ -1173,7 +1173,7 @@ const dnpInstalledState: DnpInstalledState = {
     },
     {
       ...samplePackageContainer,
-      name: "ethchain.dnp.dappnode.eth",
+      name: ethchainMetadata.name,
       isCore: true,
       version: "0.2.6",
       state: "running",
@@ -1236,6 +1236,17 @@ const dnpInstalledState: DnpInstalledState = {
         )
       },
       userSettings: lightningNetworkUserSettingsInstalled
+    },
+    [ethchainMetadata.name]: {
+      setupWizard: {
+        version: "2",
+        fields: []
+      },
+      userSettings: {
+        environment: {
+          DEFAULT_CLIENT: "GETH"
+        }
+      }
     }
   },
   dnpInstalledDataRequestStatus: {}

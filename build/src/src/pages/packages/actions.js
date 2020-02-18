@@ -24,7 +24,7 @@ import {
 export const updatePackageEnv = (id, envs) => () =>
   api.updatePackageEnv(
     { id, envs, restart: true },
-    { toastMessage: `Updating ${id} envs: ${JSON.stringify(envs)}...` }
+    { toastMessage: `Updating ${sn(id)} ${Object.keys(envs).join(", ")}...` }
   );
 
 // Used in package interface / controls
