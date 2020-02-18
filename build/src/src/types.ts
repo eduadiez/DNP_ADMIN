@@ -636,6 +636,7 @@ export interface PackageReleaseMetadata {
   disclaimer?: {
     message: string;
   };
+
   gettingStarted?: string;
   style?: {
     featuredBackground?: string;
@@ -643,6 +644,11 @@ export interface PackageReleaseMetadata {
     featuredAvatarFilter?: string;
   };
   setupWizard?: SetupWizard;
+  // Legacy setupWizardv1
+  setupSchema?: SetupSchema;
+  setupTarget?: SetupTarget;
+  setupUiJson?: SetupUiJson;
+
   author?: string;
   contributors?: string[];
   categories?: string[];
