@@ -3,15 +3,18 @@ on: [push]
 jobs:
   build:
     runs-on: ubuntu-16.04
-    strategy:
-      matrix:
-        node: [ '10', '8' ]
-    name: Node ${{ matrix.node }} sample
+    env:
+      working-directory: ./build/src 
+    name: Unit Tests
     steps:
       - uses: actions/checkout@v2
       - name: Setup node
         uses: actions/setup-node@v1
         with:
-          node-version: ${{ matrix.node }}
-      - run: npm install
-      - run: npm test
+          node-version: '10.x'
+      - name: yarn install
+        run: npm install
+        working-directory: ${{ env.working-directory }}
+      - name: yarn test
+        run: yarn test
+        working-directory: ${{ env.working-directory }}
