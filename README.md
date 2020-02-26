@@ -15,7 +15,7 @@ The **DNP_ADMIN** serves the [admin UI](build/src) accessible only if connected 
 The [admin.dnp.dappnode.eth](https://etherscan.io/enslookup?q=admin.dnp.dappnode.eth) is an AragonApp whose repo is deployed at this address: [0xee66c4765696c922078e8670aa9e6d4f6ffcc455
 ](https://etherscan.io/address/0xee66c4765696c922078e8670aa9e6d4f6ffcc455).
 
-## Getting Started
+### Getting Started
 
 This repo is an isolated single piece of DAppNode. To actually install and use DAppNode go to the [installation guide](https://github.com/dappnode/DAppNode/wiki/DAppNode-Installation-Guide).
 
