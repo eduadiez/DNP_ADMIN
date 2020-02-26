@@ -21,11 +21,3 @@ jobs:
       - name: yarn test
         run: yarn test
         working-directory: ${{ env.working-directory }}
-  build-test:
-     runs-on: ubuntu-16.04
-     name: Build test
-     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-      - name: Docker-Compose Build
-        run: docker-compose build
