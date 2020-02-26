@@ -13,7 +13,10 @@ jobs:
         with:
           node-version: '10.x'
       - name: yarn install
-        run: npm install
+        run: yarn install
+        working-directory: ${{ env.working-directory }}
+      - name: yarn lint
+        run: yarn lint
         working-directory: ${{ env.working-directory }}
       - name: yarn test
         run: yarn test
