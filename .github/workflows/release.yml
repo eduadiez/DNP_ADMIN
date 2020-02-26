@@ -6,6 +6,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      TRAVIS: yes
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@v2
       - name: Setup node
@@ -16,3 +19,6 @@ jobs:
         run: npm install -g @dappnode/dappnodesdk
       - name: Docker-Compose Build
         run: docker-compose build
+      - name: publish
+        run: dappnodesdk publish patch --dappnode_team_preset --provider infura
+
