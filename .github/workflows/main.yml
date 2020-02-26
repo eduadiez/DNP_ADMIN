@@ -7,11 +7,11 @@ jobs:
       working-directory: ./build/src   
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
+      - name: In app tests 
+        uses: actions/setup-node@v1
         with:
           node-version: '10.x'
-      - name: In app tests
-        working-directory: ${{ env.working-directory }}
+      - working-directory: ${{ env.working-directory }}     
       - run: yarn install
       - run: yarn lint
       - run: yarn test
